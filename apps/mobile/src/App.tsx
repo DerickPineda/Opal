@@ -1,50 +1,38 @@
 import React, { useState, useEffect } from 'react';
 import { View, ActivityIndicator } from 'react-native';
 import { supabase } from './services/supabase';
+import { colors } from './constants/colors';
 import { WelcomeScreen } from './screens/WelcomeScreen';
 import { SignInScreen } from './screens/SignInScreen';
 import { SignUpScreen } from './screens/SignUpScreen';
 import { OnboardingScreen } from './screens/OnboardingScreen';
 import { WelcomeAnimationScreen } from './screens/WelcomeAnimationScreen';
 import { HomeScreen } from './screens/HomeScreen';
-import { colors } from './constants/colors';
-
-type Screen =
-  | 'Welcome'
-  | 'SignIn'
-  | 'SignUp'
-  | 'Onboarding'
-  | 'WelcomeAnimation'
-  | 'Home';
+import { UploadVideoScreen } from './screens/UploadVideoScreen';
+import { CalendarScreen } from './screens/CalendarScreen';
+import { Screen, Navigation } from './navigation/types';
 
 export default function App() {
-  const [currentScreen, setCurrentScreen] = useState<Screen>('Welcome');
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
   const [userName, setUserName] = useState<string>('');
-  const [loading, setLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
+  const [needsOnboarding, setNeedsOnboarding] = useState(true);
+  const [currentScreen, setCurrentScreen] = useState<Screen>('Welcome');
 
   useEffect(() => {
-    // Check initial session
     checkUser();
 
-    // Set up auth state listener
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log('Auth event:', event); // For debugging
-
+    const { data } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (event === 'SIGNED_IN' && session?.user) {
         await handleUserSignIn(session.user.id);
       } else if (event === 'SIGNED_OUT') {
-        setUserId(null);
-        setUserName('');
-        setCurrentScreen('Welcome');
+        handleSignOut();
       }
     });
 
-    // Cleanup subscription on unmount
     return () => {
-      subscription.unsubscribe();
+      data.subscription.unsubscribe();
     };
   }, []);
 
@@ -56,21 +44,17 @@ export default function App() {
 
       if (session?.user) {
         await handleUserSignIn(session.user.id);
-      } else {
-        setCurrentScreen('Welcome');
       }
     } catch (error) {
       console.error('Error checking user:', error);
-      setCurrentScreen('Welcome');
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
   const handleUserSignIn = async (id: string) => {
     setUserId(id);
 
-    // Check if user has completed onboarding
     const { data: profile } = await supabase
       .from('profiles')
       .select('name, onboarding_completed')
@@ -79,19 +63,27 @@ export default function App() {
 
     if (profile?.onboarding_completed) {
       setUserName(profile.name);
+      setNeedsOnboarding(false);
       setCurrentScreen('WelcomeAnimation');
     } else {
+      setNeedsOnboarding(true);
       setCurrentScreen('Onboarding');
     }
+
+    setIsAuthenticated(true);
   };
 
-  const navigation = {
-    navigate: (screen: Screen) => setCurrentScreen(screen),
-    goBack: () => setCurrentScreen('Welcome'),
+  const handleSignOut = () => {
+    setIsAuthenticated(false);
+    setUserId(null);
+    setUserName('');
+    setNeedsOnboarding(false);
+    setCurrentScreen('Welcome');
   };
 
-  const handleOnboardingComplete = (name: string) => {
+  const handleOnboardingComplete = async (name: string) => {
     setUserName(name);
+    setNeedsOnboarding(false);
     setCurrentScreen('WelcomeAnimation');
   };
 
@@ -99,16 +91,23 @@ export default function App() {
     setCurrentScreen('Home');
   };
 
-  if (loading) {
+  const navigation: Navigation = {
+    navigate: (screen: Screen) => setCurrentScreen(screen),
+    goBack: () => {
+      if (!isAuthenticated) {
+        setCurrentScreen('Welcome');
+        return;
+      }
+
+      // authenticated back behavior
+      if (isAuthenticated) setCurrentScreen('Home');
+      else setCurrentScreen('Welcome');
+    },
+  };
+
+  if (isLoading) {
     return (
-      <View
-        style={{
-          flex: 1,
-          backgroundColor: colors.opal.darkest,
-          justifyContent: 'center',
-          alignItems: 'center',
-        }}
-      >
+      <View className='flex-1 bg-opal-darkest justify-center items-center'>
         <ActivityIndicator size='large' color={colors.opal.light} />
       </View>
     );
@@ -116,22 +115,35 @@ export default function App() {
 
   return (
     <>
+      {/* Auth Screens */}
       {currentScreen === 'Welcome' && <WelcomeScreen navigation={navigation} />}
       {currentScreen === 'SignIn' && <SignInScreen navigation={navigation} />}
       {currentScreen === 'SignUp' && <SignUpScreen navigation={navigation} />}
+
+      {/* Onboarding */}
       {currentScreen === 'Onboarding' && userId && (
         <OnboardingScreen
           userId={userId}
           onComplete={handleOnboardingComplete}
         />
       )}
+
+      {/* Welcome Animation */}
       {currentScreen === 'WelcomeAnimation' && (
         <WelcomeAnimationScreen
           name={userName}
           onComplete={handleWelcomeAnimationComplete}
         />
       )}
-      {currentScreen === 'Home' && <HomeScreen />}
+
+      {/* App Screens */}
+      {currentScreen === 'Home' && <HomeScreen navigation={navigation} />}
+      {currentScreen === 'Record' && (
+        <UploadVideoScreen navigation={navigation} />
+      )}
+      {currentScreen === 'Calendar' && (
+        <CalendarScreen navigation={navigation} />
+      )}
     </>
   );
 }

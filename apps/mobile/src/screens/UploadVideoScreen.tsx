@@ -1,6 +1,6 @@
 import { View, Text, TouchableOpacity, Button } from 'react-native';
 import { ActivityIndicator } from 'react-native';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   CameraView,
   CameraType,
@@ -11,6 +11,7 @@ import { BottomTabs } from '../navigation/BottomNavigationTab';
 import { colors } from '../constants/colors';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { Navigation } from '../navigation/types';
+import { useVideoRecorder } from '../camera/useVideoRecorder';
 
 interface UploadVideoScreenProps {
   navigation: Navigation;
@@ -19,6 +20,41 @@ interface UploadVideoScreenProps {
 export function UploadVideoScreen({ navigation }: UploadVideoScreenProps) {
   const [facing, setFacing] = useState<CameraType>('front');
   const [permission, requestPermission] = useCameraPermissions();
+  const [timer, setTimer] = useState<number>(60);
+
+  const { cameraRef, startRecording, stopRecording, videoUri, recording } =
+    useVideoRecorder(
+      // Place callback function here when it is written
+      (uri) => {
+        console.log('In Upload Screen with video: ' + uri);
+      }
+    );
+
+  //This is strictly to show the timer when user is recording, function below is just to format it
+  useEffect(() => {
+    if (!recording) return;
+
+    setTimer(60);
+
+    const interval = setInterval(() => {
+      setTimer((prev) => {
+        if (prev <= 1) {
+          stopRecording();
+          clearInterval(interval);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [recording]);
+
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
 
   if (!permission) {
     // Camera permissions are still loading
@@ -66,14 +102,16 @@ export function UploadVideoScreen({ navigation }: UploadVideoScreenProps) {
 
       {/* Record button and camera flip button - Bottom Middle */}
       <View className='absolute bottom-10 right-0 left-0 items-center z-50'>
+        <Text className='text-opal-light mb-2 text-lg font-semibold'>
+          {recording ? formatTime(timer) : `1:00`}
+        </Text>
         <TouchableOpacity
           className='rounded-full w-20 h-20 bg-opal-dark items-center justify-center'
-          onPress={() =>
-            // Need to add function to start recording
-            console.log('Record')
-          }
+          onPress={recording ? stopRecording : startRecording}
         >
-          <View className='w-16 h-16 rounded-full bg-opal-light' />
+          <View
+            className={`${recording ? 'w-12 h-12 aspect-square rounded-md' : 'w-16 h-16 rounded-full'} bg-opal-light`}
+          />
         </TouchableOpacity>
       </View>
 
@@ -86,7 +124,12 @@ export function UploadVideoScreen({ navigation }: UploadVideoScreenProps) {
       </TouchableOpacity>
 
       {/* Native Camera Surface (No Touchables Inside They Will Not Work) */}
-      <CameraView className='flex-1' facing={facing} mode='video' />
+      <CameraView
+        className='flex-1'
+        facing={facing}
+        mode='video'
+        ref={cameraRef}
+      />
     </View>
   );
 }

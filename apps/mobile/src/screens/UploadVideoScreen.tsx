@@ -12,6 +12,7 @@ import { colors } from '../constants/colors';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { Navigation } from '../navigation/types';
 import { useVideoRecorder } from '../camera/useVideoRecorder';
+import { EditVideoScreen } from './EditVideoScreen';
 
 interface UploadVideoScreenProps {
   navigation: Navigation;
@@ -26,7 +27,10 @@ export function UploadVideoScreen({ navigation }: UploadVideoScreenProps) {
     useVideoRecorder(
       // Place callback function here when it is written
       (uri) => {
-        console.log('In Upload Screen with video: ' + uri);
+        console.log('Passing URI into EditVideoScreen');
+        // Navigate to EditVideoScreen and pass in the videoUri and Navigation as props so we can edit.
+        // We will then upload the video from there into the backend for processing once the user edits the video
+        navigation.navigate('Edit', { videoUri: uri });
       }
     );
 

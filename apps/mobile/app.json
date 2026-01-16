@@ -35,7 +35,8 @@
           "microphonePermission": "Allow Opal to access your microphone",
           "recordAudioAndroid": true
         }
-      ]
+      ],
+      "expo-video"
     ]
   }
 }

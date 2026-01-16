@@ -6,9 +6,10 @@ export type Screen =
   | 'WelcomeAnimation'
   | 'Home'
   | 'Record'
-  | 'Calendar';
+  | 'Calendar'
+  | 'Edit';
 
 export type Navigation = {
-  navigate: (screen: Screen) => void;
+  navigate: (screen: Screen, params?: any) => void;
   goBack: () => void;
 };

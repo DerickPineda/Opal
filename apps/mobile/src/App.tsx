@@ -11,6 +11,7 @@ import { HomeScreen } from './screens/HomeScreen';
 import { UploadVideoScreen } from './screens/UploadVideoScreen';
 import { CalendarScreen } from './screens/CalendarScreen';
 import { Screen, Navigation } from './navigation/types';
+import { EditVideoScreen } from './screens/EditVideoScreen';
 
 export default function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -19,6 +20,7 @@ export default function App() {
   const [isLoading, setIsLoading] = useState(true);
   const [needsOnboarding, setNeedsOnboarding] = useState(true);
   const [currentScreen, setCurrentScreen] = useState<Screen>('Welcome');
+  const [screenParams, setScreenParams] = useState<any>(null);
 
   useEffect(() => {
     checkUser();
@@ -91,17 +93,18 @@ export default function App() {
     setCurrentScreen('Home');
   };
 
-  const navigation: Navigation = {
-    navigate: (screen: Screen) => setCurrentScreen(screen),
+  const navigation = {
+    navigate: (screen: Screen, params?: any) => {
+      setCurrentScreen(screen);
+      setScreenParams(params || null);
+    },
     goBack: () => {
-      if (!isAuthenticated) {
+      setScreenParams(null);
+      if (isAuthenticated) {
+        setCurrentScreen('Home');
+      } else {
         setCurrentScreen('Welcome');
-        return;
       }
-
-      // authenticated back behavior
-      if (isAuthenticated) setCurrentScreen('Home');
-      else setCurrentScreen('Welcome');
     },
   };
 
@@ -140,6 +143,12 @@ export default function App() {
       {currentScreen === 'Home' && <HomeScreen navigation={navigation} />}
       {currentScreen === 'Record' && (
         <UploadVideoScreen navigation={navigation} />
+      )}
+      {currentScreen === 'Edit' && screenParams?.videoUri && (
+        <EditVideoScreen
+          navigation={navigation}
+          videoUri={screenParams.videoUri}
+        />
       )}
       {currentScreen === 'Calendar' && (
         <CalendarScreen navigation={navigation} />

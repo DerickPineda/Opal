@@ -146,6 +146,7 @@ export default function App() {
       )}
       {currentScreen === 'Edit' && screenParams?.videoUri && (
         <EditVideoScreen
+          userId={userId!}
           navigation={navigation}
           videoUri={screenParams.videoUri}
         />

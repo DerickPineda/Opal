@@ -27,7 +27,6 @@ export function useVideoRecorder(onVideoRecorded?: (uri: string) => void) {
       setVideoUri(video?.uri || null);
       setRecording(false);
 
-      // TODO: Navigate to preview screen or start upload
       if (video?.uri && onVideoRecorded) {
         onVideoRecorded(video.uri);
       }

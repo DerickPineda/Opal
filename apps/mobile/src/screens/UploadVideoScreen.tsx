@@ -1,18 +1,12 @@
-import { View, Text, TouchableOpacity, Button } from 'react-native';
+import { View, Text, TouchableOpacity } from 'react-native';
 import { ActivityIndicator } from 'react-native';
 import { useState, useEffect } from 'react';
-import {
-  CameraView,
-  CameraType,
-  useCameraPermissions,
-  Camera,
-} from 'expo-camera';
-import { BottomTabs } from '../navigation/BottomNavigationTab';
+import { CameraView, CameraType, useCameraPermissions } from 'expo-camera';
+
 import { colors } from '../constants/colors';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { Navigation } from '../navigation/types';
 import { useVideoRecorder } from '../camera/useVideoRecorder';
-import { EditVideoScreen } from './EditVideoScreen';
 
 interface UploadVideoScreenProps {
   navigation: Navigation;

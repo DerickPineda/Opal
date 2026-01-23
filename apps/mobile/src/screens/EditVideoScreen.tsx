@@ -1,24 +1,39 @@
 import { Navigation } from '../navigation/types';
 import { View, Text, TouchableOpacity } from 'react-native';
-import Ionicons from '@expo/vector-icons/Ionicons';
-import { useEvent } from 'expo';
 import { useVideoPlayer, VideoView } from 'expo-video';
-import { colors } from '../constants/colors';
+import { useState } from 'react';
+import { publishVideo } from '../services/publishVideo';
 
 interface EditVideoScreenProps {
+  userId: string;
   navigation: Navigation;
   videoUri: string;
 }
 
 export function EditVideoScreen({
+  userId,
   navigation,
   videoUri,
 }: EditVideoScreenProps) {
-  // This is going to allow us to view/edit the video
+  const [uploading, setUploading] = useState(false);
+  // This is going to allow us to view
   const videoPlayer = useVideoPlayer(videoUri, (player) => {
     player.loop = true;
     player.play();
   });
+
+  const handleUpload = async () => {
+    setUploading(true);
+    try {
+      await publishVideo({ userId, uri: videoUri });
+      navigation.navigate('Home');
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setUploading(false);
+    }
+  };
+
   return (
     <View className='flex-1 bg-opal-darkest'>
       {/* Video preview */}
@@ -42,13 +57,11 @@ export function EditVideoScreen({
 
         <TouchableOpacity
           className='flex-1 bg-opal-light rounded-full py-3'
-          onPress={() => {
-            // TODO: Upload video to Supabase
-            console.log('Upload video:', videoUri);
-          }}
+          disabled={uploading}
+          onPress={handleUpload}
         >
           <Text className='text-opal-darkest text-center font-semibold text-lg'>
-            Upload
+            {uploading ? 'Uploading...' : 'Upload'}
           </Text>
         </TouchableOpacity>
       </View>

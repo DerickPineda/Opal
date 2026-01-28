@@ -9,7 +9,7 @@ import { OnboardingScreen } from './screens/OnboardingScreen';
 import { WelcomeAnimationScreen } from './screens/WelcomeAnimationScreen';
 import { HomeScreen } from './screens/HomeScreen';
 import { UploadVideoScreen } from './screens/UploadVideoScreen';
-import { CalendarScreen } from './screens/CalendarScreen';
+import { CalendarScreen } from './screens/Calendar/CalendarScreen';
 import { Screen, Navigation } from './navigation/types';
 import { EditVideoScreen } from './screens/EditVideoScreen';
 

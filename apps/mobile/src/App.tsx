@@ -12,6 +12,7 @@ import { UploadVideoScreen } from './screens/UploadVideoScreen';
 import { CalendarScreen } from './screens/Calendar/CalendarScreen';
 import { Screen, Navigation } from './navigation/types';
 import { EditVideoScreen } from './screens/EditVideoScreen';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 export default function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -117,7 +118,7 @@ export default function App() {
   }
 
   return (
-    <>
+    <SafeAreaProvider>
       {/* Auth Screens */}
       {currentScreen === 'Welcome' && <WelcomeScreen navigation={navigation} />}
       {currentScreen === 'SignIn' && <SignInScreen navigation={navigation} />}
@@ -154,6 +155,6 @@ export default function App() {
       {currentScreen === 'Calendar' && (
         <CalendarScreen navigation={navigation} />
       )}
-    </>
+    </SafeAreaProvider>
   );
 }

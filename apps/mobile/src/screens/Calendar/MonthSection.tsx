@@ -1,10 +1,11 @@
 import { View, Text, TouchableOpacity, Image } from 'react-native';
-import { Video } from './types';
+import { Video, VideosByDate } from './types';
 import { DayCell } from './DayCell';
 
 type MonthSectionProps = {
   currentDate: Date;
-  videosByDate: Record<string, Video>;
+  videosByDate: VideosByDate;
+  onDayPress: (video?: Video) => void;
 };
 
 const WEEKDAYS = ['Sun', 'Mon', 'Tues', 'Wed', 'Thu', 'Fri', 'Sat'];
@@ -15,7 +16,11 @@ const daysInMonth = (year: number, month: number): number => {
   return new Date(year, month + 1, 0).getDate();
 };
 
-export function MonthSection({ currentDate, videosByDate }: MonthSectionProps) {
+export function MonthSection({
+  currentDate,
+  videosByDate,
+  onDayPress,
+}: MonthSectionProps) {
   const monthIndex = currentDate.getMonth();
   const year = currentDate.getFullYear();
   const currentMonthName = currentDate.toLocaleString('default', {
@@ -36,7 +41,7 @@ export function MonthSection({ currentDate, videosByDate }: MonthSectionProps) {
     <View className='mb-8'>
       {/* Month Title */}
       <Text className='text-opal-light text-2xl font-semibold mb-4 self-center'>
-        {currentMonthName}
+        {currentMonthName + ' ' + year}
       </Text>
 
       {/* Weekday Labels */}
@@ -59,19 +64,16 @@ export function MonthSection({ currentDate, videosByDate }: MonthSectionProps) {
           }
 
           const dateKey = `${year}-${String(monthIndex + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-          const video = videosByDate[dateKey];
+          const video: Video = videosByDate[dateKey];
 
           return (
             <DayCell
               key={index}
               day={day}
+              month={monthIndex}
+              year={year}
               video={video}
-              onPress={() => {
-                if (videosByDate[dateKey]) {
-                  // Open video
-                  console.log('Sending to view video screen');
-                }
-              }}
+              onDayPress={onDayPress}
             />
           );
         })}

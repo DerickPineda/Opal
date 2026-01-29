@@ -3,3 +3,5 @@ export type Video = {
   videoUrl: string;
   thumbnailUrl: string;
 };
+
+export type VideosByDate = Record<string, Video>;

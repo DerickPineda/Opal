@@ -29,7 +29,7 @@ export async function uploadVideo({
     .upload(fileName, buffer, { contentType: 'video/mp4' });
 
   // Catch any errors
-  if (error) throw error;
+  if (!data?.path) throw new Error('Upliad succeeded but no path returned');
 
   return data?.path;
 }

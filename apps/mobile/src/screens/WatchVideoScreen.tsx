@@ -19,6 +19,7 @@ export function WatchVideoScreen({
   const videoPlayer = useVideoPlayer(video?.videoUrl ?? '');
 
   // Fetch the video everytime we load into the screen
+  // We are also going to create a thumbnail to display
   useEffect(() => {
     async function loadVideo() {
       const { data, error } = await supabase

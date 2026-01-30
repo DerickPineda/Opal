@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { View, Text } from 'react-native';
 import { BottomTabs } from '../../navigation/BottomNavigationTab';
 import { Navigation } from '../../navigation/types';
@@ -5,8 +6,15 @@ import { MonthSection } from './MonthSection';
 import { CalendarGrid } from './CalendarGrid';
 import { Video, VideosByDate } from './types';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import {
+  mapVideosByDate,
+  retreiveUserVideos,
+  VideoRow,
+} from '../../services/videos';
 
 type CalendarScreenProps = {
+  userId: string;
+  videos: VideoRow[];
   navigation: Navigation;
 };
 
@@ -26,43 +34,28 @@ function generateMonths(start: Date, end: Date): Date[] {
   return months;
 }
 
-export function CalendarScreen({ navigation }: CalendarScreenProps) {
+export function CalendarScreen({
+  userId,
+  navigation,
+  videos,
+}: CalendarScreenProps) {
+  const [videosByDate, setVideosByDate] = useState({});
+  // Grab user videos to pass down
+  useEffect(() => {
+    async function loadVideos() {
+      const mapped = mapVideosByDate(videos);
+      setVideosByDate(mapped);
+    }
+
+    loadVideos();
+  }, [videos]);
+
   // TODO:
   // We are using this as the start date to start generating months user can see their videos
   // This may change to when users first downloaded the app but we will come back to that later
-  const APP_START_DATE = new Date(2025, 0, 1);
+  const APP_START_DATE = new Date(2026, 0, 1);
   const today = new Date();
   const months = generateMonths(APP_START_DATE, today);
-
-  // TEMP: hardcoded test data
-  // We will grab this from the backend -- will come back just testing for now
-  const videosByDate: VideosByDate = {
-    '2026-01-01': {
-      id: 'vid-1',
-      videoUrl: 'https://example.com/video1.mp4',
-      thumbnailUrl: 'https://picsum.photos/id/1011/200/200',
-    },
-    '2026-01-03': {
-      id: 'vid-2',
-      videoUrl: 'https://example.com/video2.mp4',
-      thumbnailUrl: 'https://picsum.photos/id/1025/200/200',
-    },
-    '2026-01-07': {
-      id: 'vid-3',
-      videoUrl: 'https://example.com/video3.mp4',
-      thumbnailUrl: 'https://picsum.photos/id/1035/200/200',
-    },
-    '2026-01-14': {
-      id: 'vid-4',
-      videoUrl: 'https://example.com/video4.mp4',
-      thumbnailUrl: 'https://picsum.photos/id/1043/200/200',
-    },
-    '2026-01-21': {
-      id: 'vid-5',
-      videoUrl: 'https://example.com/video5.mp4',
-      thumbnailUrl: 'https://picsum.photos/id/1050/200/200',
-    },
-  };
 
   const handleDayPress = (video?: Video) => {
     if (!video) return;

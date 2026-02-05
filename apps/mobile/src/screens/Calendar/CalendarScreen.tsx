@@ -60,7 +60,9 @@ export function CalendarScreen({
   const handleDayPress = (video?: Video) => {
     if (!video) return;
 
-    navigation.navigate('View_Video', { videoId: video.id });
+    navigation.navigate('View_Video', {
+      video: video,
+    });
   };
 
   return (

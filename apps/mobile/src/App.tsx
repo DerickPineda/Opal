@@ -10,6 +10,7 @@ import { WelcomeAnimationScreen } from './screens/WelcomeAnimationScreen';
 import { HomeScreen } from './screens/HomeScreen';
 import { UploadVideoScreen } from './screens/UploadVideoScreen';
 import { CalendarScreen } from './screens/Calendar/CalendarScreen';
+import { WatchVideoScreen } from './screens/WatchVideoScreen';
 import { Screen, Navigation } from './navigation/types';
 import { EditVideoScreen } from './screens/EditVideoScreen';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -180,6 +181,9 @@ export default function App() {
           videos={videos}
           userId={userId!}
         />
+      )}
+      {currentScreen === 'View_Video' && screenParams?.video && (
+        <WatchVideoScreen navigation={navigation} video={screenParams.video} />
       )}
     </SafeAreaProvider>
   );

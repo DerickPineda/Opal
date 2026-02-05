@@ -7,10 +7,12 @@ export type VideoRow = {
   created_at: string;
 };
 
-export type Video = {
+export type VideoUI = {
   id: string;
   date: Date;
-  storagePath: string;
+  path: string;
+
+  videoUrl?: string;
   thumbnailUrl?: string;
 };
 
@@ -29,8 +31,8 @@ export async function retreiveUserVideos(userId: string) {
   return data as VideoRow[];
 }
 
-export function mapVideosByDate(rows: VideoRow[]): Record<string, Video> {
-  const map: Record<string, Video> = {};
+export function mapVideosByDate(rows: VideoRow[]): Record<string, VideoUI> {
+  const map: Record<string, VideoUI> = {};
 
   for (const row of rows) {
     const date = new Date(row.created_at);
@@ -39,7 +41,7 @@ export function mapVideosByDate(rows: VideoRow[]): Record<string, Video> {
     map[key] = {
       id: row.id,
       date,
-      storagePath: row.path,
+      path: row.path,
     };
   }
 

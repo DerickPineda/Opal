@@ -2,52 +2,70 @@ import { useVideoPlayer, VideoView } from 'expo-video';
 import { Navigation } from '../navigation/types';
 import { useEffect, useState } from 'react';
 import { supabase } from '../services/supabase';
-import { Video } from './Calendar/types';
+import { VideoUI } from '../services/videos';
+import { View, TouchableOpacity, ActivityIndicator } from 'react-native';
+import Ionicons from '@expo/vector-icons/Ionicons';
+import { colors } from '../constants/colors';
 
 type WatchVideoScreenProps = {
-  videoId: string;
+  video: VideoUI;
   navigation: Navigation;
 };
 
-export function WatchVideoScreen({
-  videoId,
-  navigation,
-}: WatchVideoScreenProps) {
-  const [video, setVideo] = useState<Video | null>(null);
+export function WatchVideoScreen({ video, navigation }: WatchVideoScreenProps) {
+  const [videoUrl, setVideoUrl] = useState<string | null>(null);
   const [loading, setIsLoading] = useState(true);
 
-  const videoPlayer = useVideoPlayer(video?.videoUrl ?? '');
-
+  const videoPlayer = useVideoPlayer(videoUrl ?? ' ');
   // Fetch the video everytime we load into the screen
   // We are also going to create a thumbnail to display
   useEffect(() => {
-    async function loadVideo() {
-      const { data, error } = await supabase
+    async function loadVideoUrl() {
+      const { data, error } = await supabase.storage
         .from('videos')
-        .select('*')
-        .eq('id', videoId)
-        .single();
+        .createSignedUrl(video.path, 60 * 60);
 
       if (error) {
-        console.error(error);
+        console.error('Signed URL error:', error.message);
+        setIsLoading(false);
         return;
       }
 
-      setVideo(data);
+      setVideoUrl(data.signedUrl);
       setIsLoading(false);
     }
 
-    loadVideo();
-  }, [videoId]);
+    loadVideoUrl();
+  }, [video.path]);
 
-  if (loading || !video) return;
-
+  if (loading || !videoUrl || !videoPlayer) {
+    return (
+      <View className='flex-1 bg-opal-darkest justify-center items-center'>
+        <ActivityIndicator size='large' color={colors.opal.light} />
+      </View>
+    );
+  }
   return (
-    <VideoView
-      style={{ flex: 1 }}
-      player={videoPlayer}
-      contentFit='cover'
-      nativeControls
-    />
+    <View className='flex-1 bg-opal-darkest'>
+      {/* Back Arrow Button */}
+      <View pointerEvents='box-none' className='absolute inset-0 z-50'>
+        <TouchableOpacity
+          className='absolute top-14 left-5'
+          onPress={() => navigation.goBack()}
+        >
+          <Ionicons
+            name='return-down-back'
+            size={50}
+            color={colors.opal.light}
+          />
+        </TouchableOpacity>
+      </View>
+      <VideoView
+        style={{ flex: 1 }}
+        player={videoPlayer}
+        contentFit='cover'
+        nativeControls={true}
+      />
+    </View>
   );
 }

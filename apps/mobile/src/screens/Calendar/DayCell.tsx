@@ -1,11 +1,12 @@
 import { Video } from './types';
 import { TouchableOpacity, View, Text, Image } from 'react-native';
+import { VideoUI } from '../../services/videos';
 type DayCellProps = {
   day: number;
   month: number;
   year: number;
-  video?: Video;
-  onDayPress: (video?: Video) => void;
+  video?: VideoUI;
+  onDayPress: (video?: VideoUI) => void;
 };
 
 export function DayCell({ day, month, year, video, onDayPress }: DayCellProps) {
@@ -26,7 +27,10 @@ export function DayCell({ day, month, year, video, onDayPress }: DayCellProps) {
       className='w-[14.28%] aspect-square rounded-lg overflow-hidden bg-opal-darkest'
     >
       {video ? (
-        <Image source={{ uri: video.thumbnailUrl }} className='w-full h-full' />
+        <Image
+          source={{ uri: video.thumbnailUrl! }}
+          className='w-full h-full'
+        />
       ) : (
         <View className='flex-1 items-center justify-center'>
           <Text

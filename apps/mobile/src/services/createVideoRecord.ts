@@ -3,16 +3,18 @@ import { supabase } from './supabase';
 // Here we will upload a record of the video we just created and uploaded to our supabase stoage.
 type createVideoRecordProps = {
   userId: string;
-  storagePath: string;
+  videoPath: string;
+  thumbnailPath: string | null;
 };
 
 export async function createVideoRecord({
   userId,
-  storagePath,
+  videoPath,
+  thumbnailPath,
 }: createVideoRecordProps) {
   const { data, error } = await supabase
     .from('videos')
-    .insert({ user_id: userId, path: storagePath })
+    .insert({ user_id: userId, path: videoPath, thumbnail_path: thumbnailPath })
     .select()
     .single();
 

@@ -1,11 +1,12 @@
 import { MonthSection } from './MonthSection';
 import { Video, VideosByDate } from './types';
 import { ScrollView } from 'react-native';
+import { VideoUI } from '../../services/videos';
 
 type CalendarGridProps = {
   months: Date[];
   videosByDate: VideosByDate;
-  onDayPress: (video?: Video) => void;
+  onDayPress: (video?: VideoUI) => void;
 };
 export function CalendarGrid({
   months,

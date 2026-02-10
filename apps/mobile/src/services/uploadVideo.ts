@@ -1,6 +1,8 @@
 import { supabase } from './supabase';
 import * as FileSystem from 'expo-file-system/legacy';
 import { decode } from 'base64-arraybuffer';
+import { generateVideoThumbnail } from './generateVideoThumbnail';
+import { uploadThumbnail } from './uploadThumbnail';
 type uploadVideoProps = {
   uri: string;
   userId: string;
@@ -10,10 +12,10 @@ type uploadVideoProps = {
 // We then save the actual file to the supabase storage
 
 // Supabase needs an ArrayBuffer to be used to properly upload videos to storage
-export async function uploadVideo({
-  uri,
-  userId,
-}: uploadVideoProps): Promise<string> {
+export async function uploadVideo({ uri, userId }: uploadVideoProps): Promise<{
+  videoPath: string;
+  thumbnailPath: string | null;
+}> {
   // Read file as base64
   const base64 = await FileSystem.readAsStringAsync(uri, {
     encoding: FileSystem.EncodingType.Base64,
@@ -29,7 +31,15 @@ export async function uploadVideo({
     .upload(fileName, buffer, { contentType: 'video/mp4' });
 
   // Catch any errors
-  if (!data?.path) throw new Error('Upliad succeeded but no path returned');
+  if (error || !data?.path)
+    throw new Error('Upload succeeded but no path returned');
 
-  return data?.path;
+  // We are now going to try and upload the video thumbnail uri
+  const thumbnailPath = await uploadThumbnail({ userId, videoUri: uri });
+
+  // Return both fileName (video path) and thumbnailPath
+  return {
+    videoPath: data.path,
+    thumbnailPath,
+  };
 }

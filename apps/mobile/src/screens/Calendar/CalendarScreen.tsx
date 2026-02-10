@@ -6,11 +6,7 @@ import { MonthSection } from './MonthSection';
 import { CalendarGrid } from './CalendarGrid';
 import { Video, VideosByDate } from './types';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import {
-  mapVideosByDate,
-  retreiveUserVideos,
-  VideoRow,
-} from '../../services/videos';
+import { mapVideosByDate, VideoRow, VideoUI } from '../../services/videos';
 
 type CalendarScreenProps = {
   userId: string;
@@ -39,7 +35,7 @@ export function CalendarScreen({
   navigation,
   videos,
 }: CalendarScreenProps) {
-  const [videosByDate, setVideosByDate] = useState({});
+  const [videosByDate, setVideosByDate] = useState<Record<string, VideoUI>>({});
   // Grab user videos to pass down
   useEffect(() => {
     async function loadVideos() {
@@ -57,7 +53,7 @@ export function CalendarScreen({
   const today = new Date();
   const months = generateMonths(APP_START_DATE, today);
 
-  const handleDayPress = (video?: Video) => {
+  const handleDayPress = (video?: VideoUI) => {
     if (!video) return;
 
     navigation.navigate('View_Video', {

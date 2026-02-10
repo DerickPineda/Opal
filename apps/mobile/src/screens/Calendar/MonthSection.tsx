@@ -1,11 +1,12 @@
 import { View, Text, TouchableOpacity, Image } from 'react-native';
 import { Video, VideosByDate } from './types';
 import { DayCell } from './DayCell';
+import { VideoUI } from '../../services/videos';
 
 type MonthSectionProps = {
   currentDate: Date;
   videosByDate: VideosByDate;
-  onDayPress: (video?: Video) => void;
+  onDayPress: (video?: VideoUI) => void;
 };
 
 const WEEKDAYS = ['Sun', 'Mon', 'Tues', 'Wed', 'Thu', 'Fri', 'Sat'];
@@ -64,7 +65,7 @@ export function MonthSection({
           }
 
           const dateKey = `${year}-${String(monthIndex + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-          const video: Video = videosByDate[dateKey];
+          const video: VideoUI = videosByDate[dateKey];
 
           return (
             <DayCell

@@ -9,9 +9,13 @@ import { OnboardingScreen } from './screens/OnboardingScreen';
 import { WelcomeAnimationScreen } from './screens/WelcomeAnimationScreen';
 import { HomeScreen } from './screens/HomeScreen';
 import { UploadVideoScreen } from './screens/UploadVideoScreen';
-import { CalendarScreen } from './screens/CalendarScreen';
+import { CalendarScreen } from './screens/Calendar/CalendarScreen';
+import { WatchVideoScreen } from './screens/WatchVideoScreen';
 import { Screen, Navigation } from './navigation/types';
 import { EditVideoScreen } from './screens/EditVideoScreen';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { Video } from './screens/Calendar/types';
+import { retreiveUserVideos, VideoRow } from './services/videos';
 
 export default function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -21,7 +25,10 @@ export default function App() {
   const [needsOnboarding, setNeedsOnboarding] = useState(true);
   const [currentScreen, setCurrentScreen] = useState<Screen>('Welcome');
   const [screenParams, setScreenParams] = useState<any>(null);
+  const [videos, setVideo] = useState<VideoRow[]>([]);
+  const [videosLoaded, setVideosLoaded] = useState(false);
 
+  // useEffect for checking existing user sessions & handling sign in/out
   useEffect(() => {
     checkUser();
 
@@ -37,6 +44,22 @@ export default function App() {
       data.subscription.unsubscribe();
     };
   }, []);
+
+  // useEffect that will handle user video record fetching after we have a user sign in
+  useEffect(() => {
+    if (!userId) return;
+    if (videosLoaded) return;
+
+    async function loadedVideos() {
+      if (!userId) return;
+
+      const data = await retreiveUserVideos(userId);
+      setVideo(data);
+      setVideosLoaded(true);
+    }
+
+    loadedVideos();
+  }, [userId, videosLoaded]);
 
   const checkUser = async () => {
     try {
@@ -81,6 +104,7 @@ export default function App() {
     setUserName('');
     setNeedsOnboarding(false);
     setCurrentScreen('Welcome');
+    setVideosLoaded(false);
   };
 
   const handleOnboardingComplete = async (name: string) => {
@@ -117,7 +141,7 @@ export default function App() {
   }
 
   return (
-    <>
+    <SafeAreaProvider>
       {/* Auth Screens */}
       {currentScreen === 'Welcome' && <WelcomeScreen navigation={navigation} />}
       {currentScreen === 'SignIn' && <SignInScreen navigation={navigation} />}
@@ -151,9 +175,16 @@ export default function App() {
           videoUri={screenParams.videoUri}
         />
       )}
-      {currentScreen === 'Calendar' && (
-        <CalendarScreen navigation={navigation} />
+      {currentScreen === 'Calendar' && userId && (
+        <CalendarScreen
+          navigation={navigation}
+          videos={videos}
+          userId={userId!}
+        />
       )}
-    </>
+      {currentScreen === 'View_Video' && screenParams?.video && (
+        <WatchVideoScreen navigation={navigation} video={screenParams.video} />
+      )}
+    </SafeAreaProvider>
   );
 }

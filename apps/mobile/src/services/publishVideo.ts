@@ -8,7 +8,7 @@ type publishVideoProps = {
 
 export async function publishVideo({ userId, uri }: publishVideoProps) {
   // Upload video to storage bucket
-  const fileName = await uploadVideo({ uri, userId });
+  const { videoPath, thumbnailPath } = await uploadVideo({ uri, userId });
   // Then create a record of the video and return the data
-  return createVideoRecord({ userId, storagePath: fileName });
+  return createVideoRecord({ userId, videoPath, thumbnailPath });
 }

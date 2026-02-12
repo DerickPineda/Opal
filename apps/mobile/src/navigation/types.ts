@@ -7,7 +7,8 @@ export type Screen =
   | 'Home'
   | 'Record'
   | 'Calendar'
-  | 'Edit';
+  | 'Edit'
+  | 'View_Video';
 
 export type Navigation = {
   navigate: (screen: Screen, params?: any) => void;
